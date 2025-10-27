@@ -19,7 +19,7 @@ interface DataTableProps {
 
 interface TableRow {
   index: number;
-  value: number;
+  value: number | string;
   [key: string]: number | string;
 }
 
@@ -55,7 +55,8 @@ export function DataTable({ filePath, variable }: DataTableProps): React.JSX.Ele
   const tableData = useMemo<TableRow[]>(() => {
     if (data === null) return [];
 
-    return data.values.map((value, index) => ({
+    const values = data.values.data; // Access the data array from the discriminated union
+    return values.map((value, index) => ({
       index,
       value,
       ...variable.dimensions.reduce<Record<string, number>>((acc, dim) => {
@@ -92,8 +93,12 @@ export function DataTable({ filePath, variable }: DataTableProps): React.JSX.Ele
       accessorKey: 'value',
       header: units !== '' ? `Value (${units})` : 'Value',
       cell: (info) => {
-        const value = info.getValue() as number;
-        return isNaN(value) ? 'N/A' : value.toFixed(4);
+        const value = info.getValue();
+        if (typeof value === 'string') {
+          return value;
+        }
+        const numValue = value as number;
+        return isNaN(numValue) ? 'N/A' : numValue.toFixed(4);
       },
     });
 

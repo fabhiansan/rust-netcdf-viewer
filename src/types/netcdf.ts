@@ -34,11 +34,26 @@ export interface DataPoint {
   value: number;
 }
 
+// Discriminated union for variable data (matches Rust VariableData enum)
+export type VariableData =
+  | { type: 'Numeric'; data: number[] }
+  | { type: 'Text'; data: string[] };
+
 export interface VariableDataResponse {
   var_name: string;
-  values: number[];
+  values: VariableData;
   shape: number[];
   missing_count: number;
+}
+
+// Helper function to check if data is numeric
+export function isNumericData(data: VariableData): data is { type: 'Numeric'; data: number[] } {
+  return data.type === 'Numeric';
+}
+
+// Helper function to check if data is text
+export function isTextData(data: VariableData): data is { type: 'Text'; data: string[] } {
+  return data.type === 'Text';
 }
 
 export interface VariableSubsetRequest {

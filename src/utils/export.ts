@@ -57,7 +57,7 @@ export async function exportToCSV(
       csvContent += `# Long Name: ${longName}\n`;
     }
 
-    csvContent += `# Total Data Points: ${String(data.values.length)}\n`;
+    csvContent += `# Total Data Points: ${String(data.values.data.length)}\n`;
     csvContent += `# Missing Values: ${String(data.missing_count)}\n`;
     csvContent += '\n';
   }
@@ -67,10 +67,19 @@ export async function exportToCSV(
   csvContent += headers.join(csvDelimiter) + '\n';
 
   // Add data rows
-  data.values.forEach((value, index) => {
-    const formattedValue = isNaN(value) || !isFinite(value)
-      ? missingValuePlaceholder
-      : value.toFixed(decimalPrecision);
+  const values = data.values.data;
+  values.forEach((value, index) => {
+    let formattedValue: string;
+
+    if (typeof value === 'string') {
+      // String data - escape if contains delimiter
+      formattedValue = value.includes(csvDelimiter) ? `"${value}"` : value;
+    } else {
+      // Numeric data
+      formattedValue = isNaN(value) || !isFinite(value)
+        ? missingValuePlaceholder
+        : value.toFixed(decimalPrecision);
+    }
 
     const row = [index.toString(), formattedValue];
     csvContent += row.join(csvDelimiter) + '\n';
@@ -112,14 +121,16 @@ export async function exportToJSON(
       dimensions: variable.dimensions,
       shape: variable.shape,
       attributes: variable.attributes,
-      total_points: data.values.length,
+      value_type: data.values.type, // Include data type (Numeric or Text)
+      total_points: data.values.data.length,
       missing_count: data.missing_count,
     };
   }
 
-  jsonData.data = data.values.map((value, index) => ({
+  const values = data.values.data;
+  jsonData.data = values.map((value, index) => ({
     index,
-    value: isNaN(value) || !isFinite(value) ? null : value,
+    value: typeof value === 'string' ? value : (isNaN(value) || !isFinite(value) ? null : value),
   }));
 
   // Convert to JSON string

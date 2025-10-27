@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from 'react-leaflet';
 import { invoke } from '@tauri-apps/api/core';
 import type { VariableDataResponse, Variable, FileMetadata } from '../types/netcdf';
+import { isNumericData } from '../types/netcdf';
 import 'leaflet/dist/leaflet.css';
 
 interface MapViewProps {
@@ -61,15 +62,22 @@ export function MapView({ filePath, variable, metadata }: MapViewProps): React.J
 
         setData(varResponse);
 
-        // Create map points
-        if (latResponse !== null && lonResponse !== null) {
+        // Create map points - only for numeric data
+        if (latResponse !== null && lonResponse !== null &&
+            isNumericData(varResponse.values) &&
+            isNumericData(latResponse.values) &&
+            isNumericData(lonResponse.values)) {
           const points: MapPoint[] = [];
           const maxPoints = 1000; // Limit for performance
 
-          for (let i = 0; i < Math.min(varResponse.values.length, maxPoints); i++) {
-            const value = varResponse.values[i];
-            const lat = latResponse.values[i];
-            const lon = lonResponse.values[i];
+          const varData = varResponse.values.data;
+          const latData = latResponse.values.data;
+          const lonData = lonResponse.values.data;
+
+          for (let i = 0; i < Math.min(varData.length, maxPoints); i++) {
+            const value = varData[i];
+            const lat = latData[i];
+            const lon = lonData[i];
 
             if (
               value !== undefined &&
@@ -145,7 +153,7 @@ export function MapView({ filePath, variable, metadata }: MapViewProps): React.J
       <div className="map-info">
         <p>
           Showing {mapPoints.length} points
-          {data !== null && data.values.length > mapPoints.length && ` (limited from ${data.values.length})`}
+          {data !== null && data.values.data.length > mapPoints.length && ` (limited from ${data.values.data.length})`}
         </p>
       </div>
 

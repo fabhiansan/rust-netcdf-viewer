@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import type { VariableDataResponse, Variable } from '../types/netcdf';
+import { isNumericData } from '../types/netcdf';
 
 interface StatsPanelProps {
   filePath: string;
@@ -83,9 +84,13 @@ export function StatsPanel({ filePath, variable }: StatsPanelProps): React.JSX.E
         });
         setData(response);
 
-        // Calculate statistics
-        const calculatedStats = calculateStatistics(response.values);
-        setStats(calculatedStats);
+        // Calculate statistics only for numeric data
+        if (isNumericData(response.values)) {
+          const calculatedStats = calculateStatistics(response.values.data);
+          setStats(calculatedStats);
+        } else {
+          setError('Statistics are only available for numeric variables');
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
       } finally {

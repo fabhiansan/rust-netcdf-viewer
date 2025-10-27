@@ -77,15 +77,25 @@ pub struct VariableSubsetRequest {
     pub count: Vec<usize>,
 }
 
+/// Enum representing variable data that can be either numeric or text
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type", content = "data")]
+pub enum VariableData {
+    /// Numeric data (converted to f64)
+    Numeric(Vec<f64>),
+    /// Text/string data
+    Text(Vec<String>),
+}
+
 /// Response containing variable data
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VariableDataResponse {
     /// Variable name
     pub var_name: String,
-    /// Flattened array of values
-    pub values: Vec<f64>,
+    /// Variable data (either numeric or text)
+    pub values: VariableData,
     /// Shape of the returned data
     pub shape: Vec<usize>,
-    /// Number of missing/fill values
+    /// Number of missing/fill values (only applicable for numeric data)
     pub missing_count: usize,
 }

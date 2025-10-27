@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Plot from 'react-plotly.js';
 import { invoke } from '@tauri-apps/api/core';
 import type { VariableDataResponse, Variable, FileMetadata } from '../types/netcdf';
+import { isNumericData } from '../types/netcdf';
 
 interface TimeSeriesChartProps {
   filePath: string;
@@ -47,6 +48,11 @@ export function TimeSeriesChart({ filePath, variable, metadata }: TimeSeriesChar
     return <div className="no-data">No data available</div>;
   }
 
+  // Check if data is numeric - charts only work with numeric data
+  if (!isNumericData(data.values)) {
+    return <div className="error">Charts are only available for numeric variables. This variable contains text data.</div>;
+  }
+
   // Determine if this is time-series data
   const timeVar = metadata.coordinates?.time_var;
   const isTimeSeries = timeVar !== null && timeVar !== undefined && variable.dimensions.includes(timeVar);
@@ -55,7 +61,7 @@ export function TimeSeriesChart({ filePath, variable, metadata }: TimeSeriesChar
   const xDimension = variable.dimensions[0] ?? 'index';
 
   // Create x-axis values
-  const xValues = Array.from({ length: data.values.length }, (_, i) => i);
+  const xValues = Array.from({ length: data.values.data.length }, (_, i) => i);
 
   // Get units for axis labels
   const units = variable.attributes['units'] ?? variable.attributes['unit'] ?? '';
@@ -67,7 +73,7 @@ export function TimeSeriesChart({ filePath, variable, metadata }: TimeSeriesChar
         data={[
           {
             x: xValues,
-            y: data.values,
+            y: data.values.data,
             type: 'scatter',
             mode: 'lines+markers',
             marker: { size: 4 },
@@ -109,7 +115,7 @@ export function TimeSeriesChart({ filePath, variable, metadata }: TimeSeriesChar
       />
       {data.missing_count > 0 && (
         <div className="data-info">
-          <p>Missing values: {data.missing_count} / {data.values.length}</p>
+          <p>Missing values: {data.missing_count} / {data.values.data.length}</p>
         </div>
       )}
     </div>
