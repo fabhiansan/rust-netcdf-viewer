@@ -76,7 +76,7 @@ export function AnomalyDetection({
   };
 
   const handleAnomalyItemClick = (index: number): void => {
-    if (onAnomalyClick) {
+    if (onAnomalyClick != null) {
       onAnomalyClick(index);
     }
   };
@@ -96,7 +96,7 @@ export function AnomalyDetection({
   };
 
   const formatValue = (value: number): string => {
-    return value.toFixed(2) + (units ? ` ${units}` : '');
+    return value.toFixed(2) + (units !== '' ? ` ${units}` : '');
   };
 
   return (
@@ -249,7 +249,7 @@ export function AnomalyDetection({
                   onClick={() => { handleAnomalyItemClick(anomaly.index); }}
                   role="button"
                   tabIndex={0}
-                  onKeyPress={(e) => {
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter') handleAnomalyItemClick(anomaly.index);
                   }}
                 >
@@ -304,7 +304,7 @@ export function AnomalyDetection({
             <summary>How does it work?</summary>
             <div className="explanation-content">
               <p>
-                <strong>Z-Score Method:</strong> Each data point's distance from the mean
+                <strong>Z-Score Method:</strong> Each data point&apos;s distance from the mean
                 is measured in standard deviations (σ). Points beyond the threshold are
                 flagged as anomalies.
               </p>

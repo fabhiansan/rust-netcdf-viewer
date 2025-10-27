@@ -114,7 +114,7 @@ export function AnalysisPanel({
     }
 
     // Step 1: Apply date range filter
-    let filtered = dateRange.startDate || dateRange.endDate
+    let filtered = dateRange.startDate != null || dateRange.endDate != null
       ? filterByDateRange(rawData, dateRange.startDate ?? undefined, dateRange.endDate ?? undefined)
       : [...rawData];
 
@@ -168,7 +168,7 @@ export function AnalysisPanel({
 
       anomalies = indices.map(index => {
         const point = dataForAnalysis[index];
-        if (!point) return null;
+        if (point == null) return null;
         return {
           index,
           timestamp: point.timestamp,
@@ -254,7 +254,7 @@ export function AnalysisPanel({
             <div className="active-summary">
               <strong>Active:</strong>
               <div className="summary-tags">
-                {dateRange.startDate || dateRange.endDate ? (
+                {dateRange.startDate != null || dateRange.endDate != null ? (
                   <span className="tag">Date Filter</span>
                 ) : null}
                 {valueRange.min !== null || valueRange.max !== null || valueRange.excludeOutliers ? (
@@ -288,7 +288,7 @@ export function AnalysisPanel({
                 <span className="count-value filtered">{processedData.filteredData.length}</span>
               </div>
             )}
-            {processedData.aggregatedData && (
+            {processedData.aggregatedData != null && (
               <div className="count-item">
                 <span className="count-label">Aggregated Periods:</span>
                 <span className="count-value">{processedData.aggregatedData.length}</span>
