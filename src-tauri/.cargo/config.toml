@@ -1,0 +1,8 @@
+[env]
+HDF5_DIR = "/opt/homebrew/opt/hdf5"
+NETCDF_DIR = "/opt/homebrew/opt/netcdf"
+HDF5_VERSION = "1.14.6"
+DYLD_FALLBACK_LIBRARY_PATH = "/opt/homebrew/opt/hdf5/lib"
+
+[build]
+rustflags = ["-C", "link-args=-Wl,-rpath,/opt/homebrew/opt/hdf5/lib"]
