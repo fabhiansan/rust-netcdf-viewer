@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Platform-specific cargo config
+src-tauri/.cargo/config.toml
